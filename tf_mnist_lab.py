@@ -12,7 +12,7 @@ n_pixels = 784
 T = M*dt
 
 inp = tf.placeholder(dtype = tf.float32, shape = (None, n_pixels))
-label = tf.placeholder(dtype = tf.float32)
+label = tf.placeholder(dtype = tf.float32, shape = (None, 10))
 
 def neural_network_model(inp):
     initializer = tf.initializers.random_normal
@@ -34,10 +34,8 @@ def neural_network_model(inp):
     return output
 
 def train_neural_network(sess):
-    
     alpha = neural_network_model(inp)
-    temp = tf.nn.softmax_cross_entropy_with_logits(logits=alpha, labels=label)
-    cost = tf.reduce_mean(temp)
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=alpha, labels=label))
     optimizer = tf.train.GradientDescentOptimizer(dt)
     train = optimizer.minimize(cost)
     E_1 = []
@@ -61,8 +59,8 @@ def evaluate_model(sess, alpha):
     alpha_values = alpha.eval({inp:test_images, label:test_labels})
     
     index_first_mistaken_number = alpha_is_correct.eval({inp:test_images, label:test_labels}).tolist().index(False)
-    mistaken_alpha = tf.argmax(tf.nn.softmax(alpha_values[index_first_mistaken_number,:]))
-    mistaken_label = tf.argmax(tf.nn.softmax(test_labels[index_first_mistaken_number,:]))
+    mistaken_alpha = tf.argmax(alpha_values[index_first_mistaken_number,:])
+    mistaken_label = tf.argmax(test_labels[index_first_mistaken_number,:])
     
     print('Accuracy:',accuracy.eval({inp:test_images, label:test_labels}))
     print('The first mistaken number')
